@@ -1,0 +1,16 @@
+fastapi
+uvicorn
+sqlalchemy
+databases
+psycopg2-binary
+python-jose
+passlib
+pydantic
+pydantic[email]
+asyncpg
+python-multipart
+argon2-cffi
+jinja2
+httpx
+pytest
+pytest-asyncio
