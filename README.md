@@ -35,9 +35,6 @@ project/
 │   ├── __init__.py
 │   ├── main.py
 │   ├── database.py
-├── tests/
-│   ├── __init__.py
-│   ├── test_api.py
 ├── Dockerfile
 ├── docker-compose.yml
 ├── requirements.txt
