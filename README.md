@@ -61,9 +61,5 @@ project/
 #### Documentation API
 - Documentation API: `http://localhost:8000/docs`.
 
-### Running Tests
-1. Run tests using Docker:
-   ```bash
-   docker-compose run test
-   ```
+
 
