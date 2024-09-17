@@ -59,10 +59,10 @@ project/
    ```bash
    docker-compose up --build
    ```
-3. The API will be available at `http://localhost:8000`.
+3. The API will be available at `http://localhost:8005`.
 
 #### Documentation API
-- Documentation API: `http://localhost:8000/docs`.
+- Documentation API: `http://localhost:8005/docs`.
 
 ## Functionality
 
