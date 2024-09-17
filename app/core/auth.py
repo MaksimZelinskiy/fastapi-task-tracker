@@ -50,7 +50,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     return user
 
 
-# Допоміжна функція для перевірки ролі
+# функція для перевірки ролі
 def check_role(allowed_roles: List[str]=None):
     def role_dependency(current_user: schemas_user.User = Depends(get_current_user)):
         if allowed_roles != None:

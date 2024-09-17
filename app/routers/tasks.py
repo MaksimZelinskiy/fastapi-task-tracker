@@ -6,6 +6,7 @@ from ..schemas import task as schemas_task
 from ..schemas import user as schemas_user
 from ..models import task as models_task
 from ..models import user as models_users
+from ..models import activity_log as models_activity_logs
 from ..core.auth import get_current_user, check_role
 from ..database import database
 from ..utils import send_status_update_email
@@ -51,9 +52,6 @@ async def create_task(task: schemas_task.TaskCreate, current_user: schemas_user.
 
     return JSONResponse(status_code=status.HTTP_201_CREATED, content=response)
 
-#TODO 
-# може зробити філтр пошуку Мої / Всі 
-
 @router.get("/tasks", response_model=List[schemas_task.Task])
 async def get_tasks(
     skip: int = 0, 
@@ -68,7 +66,7 @@ async def get_tasks(
     if priority is not None:
         filters.append(models_task.tasks.c.priority == priority)
 
-    # JOIN між таблицями tasks і task_assignees для фільтрації по виконавцям чи власникам
+    # LEFT JOIN між таблицями tasks і task_assignees для фільтрації по виконавцям та власникам в фільтрі
     query = select(models_task.tasks).select_from(
             models_task.tasks.outerjoin(models_task.task_assignees, models_task.tasks.c.id == models_task.task_assignees.c.task_id)
     ).where(and_(*filters)).offset(skip).limit(limit)
@@ -131,12 +129,31 @@ async def update_task(
         if owner:
             # Відправляємо лист про зміну статусу
             await send_status_update_email(owner.email, task.title, new_status)
+        
+        # Записуємо зміну статусу в журнал активності
+        await database.execute(models_activity_logs.activity_logs.insert().values(
+            task_id=task_id, 
+            user_id=current_user.id,
+            event_type="status_update",
+            description=f"Status changed from {old_status} to {new_status}"
+            )
+        )
+
 
     # Оновлюємо виконавців
     if task_update.task_assignees is not None:
         await database.execute(models_task.task_assignees.delete().where(models_task.task_assignees.c.task_id == task_id))
         for user_id in task_update.task_assignees:
             await database.execute(models_task.task_assignees.insert().values(task_id=task_id, user_id=user_id))
+        
+        # Записуємо зміну виконавців в журнал активності 
+        await database.execute(models_activity_logs.activity_logs.insert().values(
+            task_id=task_id, 
+            user_id=current_user.id,
+            event_type="assignee_update",
+            description=f"Assignees updated: {task_update.task_assignees}"
+            )
+        )
     
     # Видаляємо поле "task_assignees", якщо воно є
     update_data.pop('task_assignees', None)

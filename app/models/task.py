@@ -1,4 +1,6 @@
 from sqlalchemy import Table, Column, Integer, String, ForeignKey, DateTime, MetaData, Float
+from sqlalchemy.orm import relationship
+
 from ..database import metadata
 from datetime import datetime
 
@@ -20,3 +22,5 @@ task_assignees = Table(
     Column("task_id", Integer, ForeignKey("tasks.id"), primary_key=True),
     Column("user_id", Integer, ForeignKey("users.id"), primary_key=True)
 )
+
+tasks.comments = relationship("comments", backref="task", cascade="all, delete")

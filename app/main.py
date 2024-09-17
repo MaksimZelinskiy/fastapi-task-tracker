@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from .routers import auth, tasks
+from .routers import auth, tasks, comments, activity_log
 from .database import database, metadata, engine, connect_to_database, close_database_connection
 from .models import task, user
 from .utils import init_roles
@@ -21,10 +21,11 @@ async def startup():
 
 @app.on_event("shutdown")
 async def shutdown():
-    # metadata.drop_all(bind=engine)
 
     await database.disconnect()
     await close_database_connection()
 
 app.include_router(auth.router)
 app.include_router(tasks.router)
+app.include_router(comments.router)
+app.include_router(activity_log.router)
