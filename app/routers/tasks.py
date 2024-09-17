@@ -132,14 +132,22 @@ async def update_task(
         
         # Записуємо зміну статусу в журнал активності
         await database.execute(models_activity_logs.activity_logs.insert().values(
-            task_id=task_id, 
-            user_id=current_user.id,
-            event_type="status_update",
-            description=f"Status changed from {old_status} to {new_status}"
+                task_id=task_id, 
+                user_id=current_user.id,
+                event_type="status_update",
+                description=f"Status changed from {old_status} to {new_status}"
             )
         )
 
-
+    if task_update.priority is not None and task_update.priority != task.priority:
+        await database.execute(models_activity_logs.activity_logs.insert().values(
+                task_id=task_id, 
+                user_id=current_user.id,
+                event_type="priority_update",
+                description=f"Priority updated: {task_update.priority}"
+            )
+        )
+        
     # Оновлюємо виконавців
     if task_update.task_assignees is not None:
         await database.execute(models_task.task_assignees.delete().where(models_task.task_assignees.c.task_id == task_id))
@@ -148,10 +156,10 @@ async def update_task(
         
         # Записуємо зміну виконавців в журнал активності 
         await database.execute(models_activity_logs.activity_logs.insert().values(
-            task_id=task_id, 
-            user_id=current_user.id,
-            event_type="assignee_update",
-            description=f"Assignees updated: {task_update.task_assignees}"
+                task_id=task_id, 
+                user_id=current_user.id,
+                event_type="assignee_update",
+                description=f"Assignees updated: {task_update.task_assignees}"
             )
         )
     

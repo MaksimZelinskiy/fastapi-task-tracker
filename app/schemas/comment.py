@@ -8,9 +8,7 @@ class CommentCreate(BaseModel):
 class Comment(BaseModel):
     id: int
     task_id: int
-    user_id: Optional[int]
     content: str
-    created_at: datetime
 
     class Config:
         orm_mode = True

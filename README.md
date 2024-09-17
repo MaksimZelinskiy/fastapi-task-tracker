@@ -108,7 +108,7 @@ project/
 - Comments have been left for users on this task.
 
 **7. Activity log (`GET /tasks/{task_id}/activity_log`)**:
-- Tracks changes and updates to tasks, such as status_update, assignment_update.
+- Tracks changes and updates to tasks, such as status_update, assignment_update, priority_update.
 - Returns a the activity log for a task.
 
 ### Authentication:

@@ -15,9 +15,8 @@ async def get_task_activity_log(
     current_user: schemas_user.User = Depends(get_current_user)
 ):
     # Отримуємо журнал активності для конкретної задачі
-    query = select(models_activity_log).where(models_activity_log.c.task_id == task_id)
-    result = await database.execute(query)
-    activity_log = result.fetchall()
+    query = select(models_activity_log.activity_logs).where(models_activity_log.activity_logs.c.task_id == task_id)
+    activity_log = await database.fetch_all(query)
 
     if not activity_log:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No activity found for this task")

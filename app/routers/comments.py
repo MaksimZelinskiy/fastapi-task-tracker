@@ -17,22 +17,20 @@ async def add_comment_to_task(
     current_user: schemas_user.User = Depends(get_current_user)
 ):
     # Перевіряємо, чи існує задача
-    task_query = select(models_task).where(models_task.c.id == task_id)
+    task_query = select(models_task.tasks).where(models_task.tasks.c.id == task_id)
     task = await database.execute(task_query)
-    task = task.scalar_one_or_none()
     if task is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Task not found")
 
-    # Створюємо новий коментар
-    query = models_comment.insert().values(
-        task_id=task_id,
-        user_id=current_user.id,
-        content=comment_data.content
+    last_record_id = await database.execute(
+        models_comment.comments.insert().values(
+            task_id=task_id,
+            user_id=current_user.id,
+            content=comment_data.content
+        )
     )
-    last_record_id = await database.execute(query)
-    await database.commit()
 
-    return {**comment_data.dict(), "id": last_record_id, "user_id": current_user.id, "task_id": task_id}
+    return {**comment_data.dict(), "id": last_record_id, "task_id": task_id}
 
 
 # Отримання коментарів до задачі
@@ -42,15 +40,13 @@ async def get_comments_for_task(
     current_user: schemas_user.User = Depends(get_current_user)
 ):
     # Перевіряємо, чи існує задача
-    task_query = select(models_task).where(models_task.c.id == task_id)
+    task_query = select(models_task.tasks).where(models_task.tasks.c.id == task_id)
     task = await database.execute(task_query)
-    task = task.scalar_one_or_none()
     if task is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Task not found")
 
     # Отримуємо коментарі до задачі
-    query = select(models_comment).where(models_comment.c.task_id == task_id)
-    result = await database.execute(query)
-    comments = result.fetchall()
+    query = select(models_comment.comments).where(models_comment.comments.c.task_id == task_id)
+    result = await database.fetch_all(query)
 
-    return comments
+    return result

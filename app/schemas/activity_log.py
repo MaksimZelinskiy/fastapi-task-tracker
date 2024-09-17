@@ -7,7 +7,6 @@ class ActivityLog(BaseModel):
     user_id: int
     event_type: str
     description: str
-    created_at: datetime
 
     class Config:
         orm_mode = True
